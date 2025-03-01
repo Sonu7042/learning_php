@@ -1,5 +1,5 @@
 <?php
-include 'config.php';           //I have push code on github
+include 'config.php';           //I have push code on github. this code is push by sonu
 
 $val = 1;
 //signup
