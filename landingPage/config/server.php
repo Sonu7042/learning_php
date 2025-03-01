@@ -1,5 +1,5 @@
 <?php
-include 'config.php';
+include 'config.php';           //I have push code on github
 
 $val = 1;
 //signup
