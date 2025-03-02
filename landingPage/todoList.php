@@ -287,7 +287,6 @@
                 })
 
 
-
                 $(document).on("click", "#closeBtn", function(e) {
                     $(".update").addClass('hidden')
                 })
@@ -319,9 +318,11 @@
                     })
                 })
 
+
                 function getMaxOrZero(arr) {
                     return arr.length ? Math.max(...arr) : 0;
                 }
+
 
                 // addListOptions 
                 $(document).on("click", '.addList', function(e) {
@@ -346,6 +347,8 @@
                         list = 'Untitled List (' + list_no + ')';
                         temp_list = 'Untitled List(' + list_no + ')';
                     }
+
+
                     $.ajax({
                         type: 'Post',
                         url: 'config/server.php',
@@ -364,8 +367,6 @@
                         }
                     })
                 })
-
-
 
 
                 function fetchAllLists() {
@@ -388,10 +389,12 @@
 
 
                 function unlistRender(data, listInput = "") {
+                  
                     let span = listInput == 1 ? "hidden" : "";
                     let input = listInput == 1 ? "" : "hidden";
                     if(data !=undefined){
                     if (data.length > 0) {
+                        $('.optionList').htm("");
                         data.forEach((element, index) => {
                             let html = `
                                     <li id="${element.id}" class="p-2 rounded-md hover-gray-200 flex gap-4 items-center cursor-pointer rightClick list${element.id}">
@@ -413,15 +416,11 @@
                     // Check if the clicked element is NOT inside .exclude
                     if (!$(event.target).closest('.listInputActive').length) {
                         let activeInput = $('.activeInput').data('id');
-                        // console.log(activeInput)
                         $('.listInput').addClass('hidden');
                         $('.listSpan').removeClass('hidden');
                         $(".listInput" + activeInput).focus().select();
-
-                        let inputValue = $('.listInput').val()
-                        let listId = $('.rightClick').attr('id');
-
-                        // alert(inputValue, activeInput)
+                        let listId = $('.editTask').attr('id');
+                        let inputValue = $('.listInput'+listId).val()
                         $.ajax({
                             type: "POST",
                             url: './config/server.php',
@@ -432,9 +431,8 @@
                             },
                             success: function(response) {
                                 let res = JSON.parse(response);
-                                // console.log("Update successful", res);
-                                // $('.optionList').html("")
-                                // fetchAllLists()
+                                $('.optionList').empty("")
+                                fetchAllLists()
                             },
                             error: function(res) {
                                 console.log("This is an error");
@@ -442,6 +440,9 @@
                         });
                     }
                 });
+
+
+
 
 
                 window.deleteTask = function() {
@@ -495,11 +496,8 @@
                 });
 
 
-                $(document).on('submit', '#seachSumit', function(e) {
-                    e.preventDefault();
-                    let searchValue = $('#search').val()
-                    // console.log(searchValue)
-                })
+ // console.log(searchValue)
+            
 
             })
         </script>
