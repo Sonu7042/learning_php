@@ -1,6 +1,5 @@
     <?php
     include './config/config.php';
-    //  print_r($_SESSION);
     ?>
     <!DOCTYPE html>
     <html lang="en">
@@ -170,8 +169,6 @@
                 let cacheData = []
 
 
-
-
                 $(document).on('click', '#add', function(e) {
                     e.preventDefault();
                     let form = $('#addTask')
@@ -292,7 +289,6 @@
                 })
 
 
-
                 $(document).on("click", "#updateData", function(e) {
                     e.preventDefault()
                     let form = $('#updateForm')
@@ -318,11 +314,10 @@
                     })
                 })
 
-
+                //start left-bottom functionaliy 
                 function getMaxOrZero(arr) {
                     return arr.length ? Math.max(...arr) : 0;
                 }
-
 
                 // addListOptions 
                 $(document).on("click", '.addList', function(e) {
@@ -334,21 +329,17 @@
                         let arrTemp = []
                         allList.each(function(item, index) {
                             let temp_list = $(this).attr('temp_list');
-                            let subTempList= temp_list.slice(0, 13)
+                            let subTempList = temp_list.slice(0, 13)
                             let list_no = parseInt($(this).attr('list_no'));
                             if (subTempList === 'Untitled List') {
                                 arrTemp.push(list_no);
                             }
                         });
-                        // console.log(arrTemp)
                         let maxNo = getMaxOrZero(arrTemp)
-                        // console.log(maxNo)
                         list_no = parseInt(maxNo) + 1;
                         list = 'Untitled List (' + list_no + ')';
                         temp_list = 'Untitled List(' + list_no + ')';
                     }
-
-
                     $.ajax({
                         type: 'Post',
                         url: 'config/server.php',
@@ -378,7 +369,6 @@
                         },
                         success: function(res) {
                             let response = JSON.parse(res)
-                            // console.log(response)
                             unlistRender(response.data)
                         },
                         error: function(error) {
@@ -388,39 +378,42 @@
                 }
 
 
+
                 function unlistRender(data, listInput = "") {
-                  
                     let span = listInput == 1 ? "hidden" : "";
                     let input = listInput == 1 ? "" : "hidden";
-                    if(data !=undefined){
-                    if (data.length > 0) {
-                        $('.optionList').htm("");
-                        data.forEach((element, index) => {
-                            let html = `
+                    if (data != undefined) {
+                        if (data.length > 0) {
+                            data.forEach((element, index) => {
+                                let html = `
                                     <li id="${element.id}" class="p-2 rounded-md hover-gray-200 flex gap-4 items-center cursor-pointer rightClick list${element.id}">
                                         <i class="fa-solid fa-bars"></i>
                                         <span class="${span} addTask${element.id} listSpan" contenteditable="false" temp_list="${element.temp_list}" list_no="${element.list_no}">${element.list}</span>
                                         <input class="${input} listInput${element.id} listInputActive listInput listInputActive bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text" name="list_name" value="${element.list}"> 
                                     </li> 
                                     `;
-                            $('.optionList').append(html);
-                            $(".activeInput").attr("data-id", element.id);
-                            $(".listInput" + element.id).focus().select();
-                        });
+                                $('.optionList').append(html);
+                                $(".activeInput").attr("data-id", element.id);
+                                $(".listInput" + element.id).focus().select();
+                            });
+                        }
                     }
-                }
                 }
 
 
                 $(document).click(function(event) {
                     // Check if the clicked element is NOT inside .exclude
-                    if (!$(event.target).closest('.listInputActive').length) {
+                    if (
+                        !$(event.target).closest('.listInputActive').length &&
+                        !$(event.target).closest('.addList').length &&
+                        !$(event.target).closest('.context-menu').length
+                    ) {
                         let activeInput = $('.activeInput').data('id');
                         $('.listInput').addClass('hidden');
                         $('.listSpan').removeClass('hidden');
                         $(".listInput" + activeInput).focus().select();
                         let listId = $('.editTask').attr('id');
-                        let inputValue = $('.listInput'+listId).val()
+                        let inputValue = $('.listInput' + listId).val()
                         $.ajax({
                             type: "POST",
                             url: './config/server.php',
@@ -440,9 +433,6 @@
                         });
                     }
                 });
-
-
-
 
 
                 window.deleteTask = function() {
@@ -466,16 +456,30 @@
                     })
                 }
 
-
-
                 $(document).on('click', '.editTask', function(e) {
                     let id = $(this).attr('id');
-                    $('.listInput' + id).removeClass('hidden');
+                    let inputField = $('.listInput' + id);
+                    let listName = inputField.val();
+                    console.log(id, listName)
+
+                    inputField.removeClass('hidden');
                     $('.addTask' + id).addClass('hidden');
-                    $(".listInput" + id).focus().select();
-                    $('#contextMenu').fadeOut('fast')
-                    return false
-                    let listName = $(this).find('.editlist').val();
+                    inputField.focus().select();
+                    $('#contextMenu').fadeOut('fast');
+
+                    // if (listName == 'Untitled List') {
+                    //     return false;
+                    // }
+
+                    inputField.on('keypress', function(e) {
+                        if (e.which === 13) { // 13 is the Enter key
+                            alert("hello")
+                            updateList(id, listName);
+                        }
+                    });
+                });
+
+                function updateList(id, listName) {
                     $.ajax({
                         type: "POST",
                         url: './config/server.php',
@@ -486,18 +490,13 @@
                         },
                         success: function(response) {
                             let res = JSON.parse(response);
-                            // console.log("Update successful", res);
-                            fetchAllLists();
+                            // fetchAllLists();
                         },
                         error: function(res) {
                             console.log("This is an error");
                         }
                     });
-                });
-
-
- // console.log(searchValue)
-            
+                }
 
             })
         </script>

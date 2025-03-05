@@ -141,7 +141,6 @@ if (isset($_POST['addTask'])) {
                     $data[] = $row;
                 }
                 // print_r($data); die;
-
                 $returnData['taskList'] = $data;
                 $returnData['success'] = true;
                 $returnData['message'] = "task added successfully";
