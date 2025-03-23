@@ -38,7 +38,6 @@ if(isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') {
       </div>
       <!-- Email -->
       <div>
-
         <label for="email" class="block text-sm font-medium text-gray-700">Email Address</label>
         <input
           type="email"
@@ -167,13 +166,12 @@ if(isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') {
 
 
         $.ajax({
-          type: method,
+          type: method, 
           url: url,
           data: form.serialize(),
           success: function(response) {
             const res = JSON.parse(response)
             console.log(res)
-
             if (res.success == true) {
               toastr.success(res.message)
               setTimeout(() => {
@@ -203,7 +201,6 @@ if(isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') {
               if (res.message) {
                 toastr.error(res.message);
               }
-
             }
           },
           error: function(response) {
@@ -212,6 +209,7 @@ if(isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') {
         });
       }
     })
+
 
 
     $(document).on("keyup", "#fullname", function(e) {
@@ -223,7 +221,7 @@ if(isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') {
       } else {
         $(".fullName_error").text("");
         $(".fullName_error").addClass("hidden");
-        $("#fullname").removeClass('border-red-500')
+        $("#fullname").removeClass('border-red-500');
       }
     })
 
@@ -234,7 +232,6 @@ if(isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') {
         $(".email_error").text("email is required");
         $(".email_error").removeClass("hidden");
         $("#email").addClass('border-red-500');
-
       } else {
         $(".email_error").text("");
         $(".email_error").addClass("hidden");
@@ -250,8 +247,6 @@ if(isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') {
         $(".password_error").text("password is required");
         $(".password_error").removeClass("hidden");
         $("#password").addClass('border-red-500');
-
-
       } else {
         $(".password_error").text("");
         $(".password_error").addClass("hidden");
@@ -267,7 +262,6 @@ if(isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') {
         $(".confirmPassword_error").text("confirmPassword is required");
         $(".confirmPassword_error").removeClass("hidden");
         $("#confirm-password").addClass('border-red-500');
-
       } else {
         $(".confirmPassword_error").text("");
         $(".confirmPassword_error").addClass("hidden");

@@ -28,6 +28,11 @@
                 z-index: 1000;
                 padding: 10px 0;
             }
+
+            .active-list {
+                padding: 10px;
+                background-color: #e5e7eb;
+            }
         </style>
     </head>
 
@@ -50,22 +55,22 @@
                         <h2 class="text-lg font-semibold heading"><?php echo $_SESSION['loginUserData']['name']; ?></h2>
                         <p class="text-sm text-gray-500"><?php echo $_SESSION['loginUserData']['email']; ?></p>
                     </div>
-
                 </div>
 
                 <!-- use for search -->
                 <form action="" method="post" id="seachSumit">
                     <input type="text" placeholder="Search" onchange="" id="search" name="search" class="w-full p-2 mt-4 border-b-2 border-black-600 outline-none">
-                    <button type="submit">Submit</button>
+                    <button class="hidden" type="submit">Submit</button>
                 </form>
 
-                <nav class="mt-5 border-b-2 ">
-                    <ul class="space-y-2">
-                        <li class="p-2 rounded-md hover:bg-gray-200 cursor-pointer">📅 My Day</li>
-                        <li class="p-2 rounded-md hover:bg-gray-200 cursor-pointer">⭐ Important</li>
-                        <li class="p-2 rounded-md hover:bg-gray-200 cursor-pointer">📆 Planned</li>
-                        <li class="p-2 roundsed-md hover:bg-gray-200 cursor-pointer">👤 Assigned to me</li>
-                        <li class="p-2 rounded-md hover:bg-gray-200 cursor-pointer">📋 Tasks</li>
+                <nav class="mt-5 border-b-2  ">
+                    <ul class="space-y-2 defaultList">
+                        <li class="active-list p-2 rounded-md hover:bg-gray-200 cursor-pointer defaultListItem" data-id="myDay">📅 My Day</li>
+                        <li class=" p-2 rounded-md hover:bg-gray-200 cursor-pointer defaultListItem" data-id="important">⭐ Important</li>
+                        <li class=" p-2 rounded-md hover:bg-gray-200 cursor-pointer defaultListItem" data-id="plan">📆 Planned</li>
+                        <li class=" p-2 rounded-md hover:bg-gray-200 cursor-pointer defaultListItem" data-id="completed">✅  Completed</li>
+                        <li class=" p-2 rounded-md hover:bg-gray-200 cursor-pointer defaultListItem" data-id="all">📋 All</li>
+                        <li class=" p-2 rounded-md hover:bg-gray-200 cursor-pointer defaultListItem" data-id="tasks">📋 Tasks</li>
                     </ul>
                 </nav>
 
@@ -77,7 +82,7 @@
                 </nav>
 
                 <div class="absolute bottom-0 bg-gray-200 -left-1 p-1 w-full shadow-md">
-                    <div class="flex justify-center items-center gap-2 addList  cursor-pointer">
+                    <div class="flex justify-center items-center gap-2 addList cursor-pointer">
                         <span class="text-2xl">+</span>
                         <p>New List</p>
                     </div>
@@ -88,7 +93,6 @@
             <!-- Main Content -->
             <main class="flex-1 flex flex-col bg-cover bg-center p-5"
                 style="background-image: url('https://source.unsplash.com/random/1600x900');">
-
                 <!-- Header -->
                 <div class="flex justify-between items-center">
                     <h1 class="text-3xl font-bold">My Day</h1>
@@ -97,7 +101,6 @@
                         <button class="p-2 rounded-full bg-gray-200 hover:bg-gray-300">💡</button>
                     </div>
                 </div>
-
                 <!-- Task List -->
                 <div id="taskList" class="mt-5 p-3 w-full overflow-auto scrollBar">
                     <!-- <div class="flex items-center space-x-2 w-full ">
@@ -157,34 +160,46 @@
                     <button class="text-red-500">🗑</button>
                 </div>
             </div>
-
         </div>
 
         <script src="./assets/js/jquery-3.6.4.min.js"></script>
         <script src="./assets/js/custom.js"></script>
+
         <script>
             $(document).ready(function() {
                 fetchTodo()
                 fetchAllLists()
+
+                let activeListId = $('.active-list').data('id')
+                fetchTodo(activeListId)
+
+                let defaultListId
+                $(document).on('click', '.defaultListItem', function() {
+                    $('.defaultListItem').removeClass('active-list')
+                    $(this).addClass('active-list')
+                    defaultListId = $(this).attr('data-id');
+                    fetchTodo(defaultListId)
+                })
+
+
                 let cacheData = []
-
-
                 $(document).on('click', '#add', function(e) {
                     e.preventDefault();
-                    let form = $('#addTask')
-                    let url = form.attr('action')
-                    let method = form.attr('method')
+                    let form = $('#addTask');
+                    let url = form.attr('action');
+                    let method = form.attr('method');
+                    var formData = form.serialize();
+                    formData += "&id=" + defaultListId;
                     $.ajax({
                         type: method,
                         url: url,
-                        data: form.serialize(),
+                        data: formData,
                         success: function(response) {
                             let res = JSON.parse(response)
-
+                            console.log(res)
                             renderData(res.taskList)
                             $("#taskInput").val("")
                             cacheData.push(res.taskList)
-
                         },
                         error: function(response) {
                             console.log("this is error in this code")
@@ -193,24 +208,25 @@
                 })
 
 
-                function fetchTodo() {
-                    // let userId = "<?php echo $_SESSION['loginId'] ?? ''; ?>";
+                function fetchTodo(id = "") {   
+                    let request = {
+                        todoList: true,
+                    }
+                    if (id != "") {
+                        request.id = id
+                    }
                     $.ajax({
                         type: 'POST',
                         url: './config/server.php',
-                        data: {
-                            todoList: true,
-                            userId: "<?php echo $_SESSION['loginId'] ?? ''; ?>"
-                        },
+                        data: request,
                         success: function(response) {
                             let res = JSON.parse(response)
-                            // console.log(res)
                             if (res.success) {
                                 renderData(res.tasks)
                                 cacheData.push(res.tasks)
                             }
                         },
-                        error: function(response) {
+                        error:function(response) {
                             console.log("this is error in this code")
                         }
                     })
@@ -220,33 +236,107 @@
                 function renderData(data) {
                     let taskList = document.getElementById('taskList');
                     taskList.innerHTML = ``;
-
                     if (data.length > 0) {
                         data.map((item, index) => {
-                            // console.log(item)
+
+                            let is_imp
+                            if(item.is_imp==1){
+                                is_imp="fa-solid"
+                            }else{
+                                is_imp="fa-regular"
+                            }
+
                             let card = document.createElement('div');
-                            card.classList = "flex items-center w-full";
+
+                            card.classList = `flex items-center w-full removeImp${item.id}`;
 
                             let newTask = document.createElement('div');
                             newTask.classList = "flex items-center justify-between w-full mt-2 bg-white p-3 rounded-lg shadow-md";
 
                             newTask.innerHTML = `<div class="flex items-center space-x-2">
-                                                    <input type="sbox" class="w-5 h-5">
+                                                    <input type="checkbox" class="w-5 h-5 toggleCheckBox iscomp${item.id}" data-id="${item.id}" is_comp="${item.is_comp}" >
                                                     <p class="text-lg text-gray-800">${item.task}</p>
-                                                </div> `;
+                                                </div>`;
 
                             let actionBtn = document.createElement('div');
                             actionBtn.classList = "text-red-500 hover:text-red-700 flex gap-5 cursor-pointer p-2";
                             actionBtn.innerHTML = `<i class="fa-solid fa-trash delete" name=${item.id}></i>
                                                    <i class="fa-solid fa-pen-to-square edit" name=${item.id}></i>
-                                                   `;
+                                                   <i class="taskStar isImp${item.id}  fa fa-star"  data-id="${item.id}" data-imp="${item.is_imp}"></i>`;
+                                                   
                             newTask.appendChild(actionBtn);
                             card.appendChild(newTask);
                             taskList.appendChild(card);
                         });
-
                     }
                 }
+
+
+                // add to important task list
+                $(document).on('click', '.taskStar', function() {
+                    $(this).toggleClass('fa-regular fa-solid');
+                    let id = $(this).attr('data-id');
+                    let imp = $(this).attr('data-imp');
+                    $.ajax({
+                        type: 'POST',
+                        url: './config/server.php',
+                        data:{
+                            updateImp: true,
+                            id:id,
+                            imp:imp
+                        },
+                        success:function(res){
+                            let response= JSON.parse(res)
+                            // console.log(response)
+                            let is_imp
+                            if(response.success){
+                                if(imp==0){
+                                    is_imp="fa-regular"
+                                    $('.isImp'+id).removeClass('fa-regular').addClass('fa-solid')
+                                    $('.isImp'+id).attr('data-imp', 1)
+                                }else{
+                                    is_imp="fa-solid"
+                                    let isImp = $('.defaultListItem').attr('data-id')
+                                    $('.isImp'+id).addClass('fa-regular').removeClass('fa-solid')
+                                    $('.isImp'+id).attr('data-imp', 0)
+                                    let getId= $('.active-list').attr('data-id')
+                                    if(getId==="important"){
+                                        $('.removeImp'+id).remove()
+
+                                    }
+                                }
+                            }
+                        }
+                    })
+                });
+
+
+                // check box code 
+                $(document).on('click', '.toggleCheckBox', function(){
+                    let id= $(this).attr('data-id');
+                    let imp= $(this).attr('is_comp');
+                    $.ajax({
+                        type: 'POST',
+                        url: './config/server.php',
+                        data:{ 
+                            updateComp: true,
+                            id:id,
+                            imp:imp
+                        },
+                        success:function(res){
+                            let response = JSON.parse(res)
+                            console.log(response)
+                        },
+                        error:function(xhr, status, error){
+                            console.log(xhr.responseText);
+                        }
+                    })
+                    
+                })
+
+
+
+
 
 
                 $(document).on("click", ".delete", function() {
@@ -273,11 +363,9 @@
                 $(document).on("click", ".edit", function(e) {
                     $(".update").removeClass('hidden')
                     id = $(this).attr('name')
-                    // console.log(id)
                     cacheData[0].filter((item, index) => {
                         if (item.id == id) {
                             let task = item.task
-                            // console.log(task)
                             document.querySelector('#showData').value = task
                         }
                     })
@@ -295,7 +383,6 @@
                     let url = form.attr('action')
                     let method = form.attr('method')
                     // let id = $('.edit').attr('name')
-                    // console.log(id)
                     $.ajax({
                         type: method,
                         url: url,
@@ -313,6 +400,21 @@
                         }
                     })
                 })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
                 //start left-bottom functionaliy 
                 function getMaxOrZero(arr) {
@@ -359,7 +461,7 @@
                     })
                 })
 
-
+                // fetch all list enter by user on first render 
                 function fetchAllLists() {
                     $.ajax({
                         type: 'Post',
@@ -377,8 +479,6 @@
                     })
                 }
 
-
-
                 function unlistRender(data, listInput = "") {
                     let span = listInput == 1 ? "hidden" : "";
                     let input = listInput == 1 ? "" : "hidden";
@@ -388,8 +488,8 @@
                                 let html = `
                                     <li id="${element.id}" class="p-2 rounded-md hover-gray-200 flex gap-4 items-center cursor-pointer rightClick list${element.id}">
                                         <i class="fa-solid fa-bars"></i>
-                                        <span class="${span} addTask${element.id} listSpan" contenteditable="false" temp_list="${element.temp_list}" list_no="${element.list_no}">${element.list}</span>
-                                        <input class="${input} listInput${element.id} listInputActive listInput listInputActive bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text" name="list_name" value="${element.list}"> 
+                                        <span class="${span} addTask${element.id} listSpan" contenteditable="false" temp_list="${element.temp_list}" list_no="${element.list_no}">${element.list_name}</span>
+                                        <input class="${input} listInput${element.id} listInputActive listInput listInputActive bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-white dark:border-gray-600 dark:placeholder-gray-400 dark:text-black dark:focus:ring-blue-500 dark:focus:border-blue-500" type="text" name="list_name" value="${element.list_name}"> 
                                     </li> 
                                     `;
                                 $('.optionList').append(html);
@@ -400,39 +500,38 @@
                     }
                 }
 
-
-                $(document).click(function(event) {
-                    // Check if the clicked element is NOT inside .exclude
-                    if (
-                        !$(event.target).closest('.listInputActive').length &&
-                        !$(event.target).closest('.addList').length &&
-                        !$(event.target).closest('.context-menu').length
-                    ) {
-                        let activeInput = $('.activeInput').data('id');
-                        $('.listInput').addClass('hidden');
-                        $('.listSpan').removeClass('hidden');
-                        $(".listInput" + activeInput).focus().select();
-                        let listId = $('.editTask').attr('id');
-                        let inputValue = $('.listInput' + listId).val()
-                        $.ajax({
-                            type: "POST",
-                            url: './config/server.php',
-                            data: {
-                                "updateList": true,
-                                id: listId,
-                                listName: inputValue
-                            },
-                            success: function(response) {
-                                let res = JSON.parse(response);
-                                $('.optionList').empty("")
-                                fetchAllLists()
-                            },
-                            error: function(res) {
-                                console.log("This is an error");
-                            }
-                        });
-                    }
-                });
+                // $(document).click(function(event) {
+                //     // Check if the clicked element is NOT inside .exclude
+                //     if (
+                //         !$(event.target).closest('.listInputActive').length &&
+                //         !$(event.target).closest('.addList').length &&
+                //         !$(event.target).closest('.context-menu').length
+                //     ) {
+                //         let activeInput = $('.activeInput').data('id');
+                //         $('.listInput').addClass('hidden');
+                //         $('.listSpan').removeClass('hidden');
+                //         $(".listInput" + activeInput).focus().select();
+                //         let listId = $('.editTask').attr('id');
+                //         let inputValue = $('.listInput' + listId).val()
+                //         $.ajax({
+                //             type: "POST",
+                //             url: './config/server.php',
+                //             data: {
+                //                 "updateList": true,
+                //                 id: listId,
+                //                 listName: inputValue
+                //             },
+                //             success: function(response) {
+                //                 let res = JSON.parse(response);
+                //                 $('.optionList').empty("")
+                //                 fetchAllLists()
+                //             },
+                //             error: function(res) {
+                //                 console.log("This is an error");
+                //             }
+                //         });
+                //     }
+                // });
 
 
                 window.deleteTask = function() {
@@ -455,6 +554,7 @@
                         }
                     })
                 }
+
 
                 $(document).on('click', '.editTask', function(e) {
                     let id = $(this).attr('id');
@@ -479,6 +579,7 @@
                     });
                 });
 
+
                 function updateList(id, listName) {
                     $.ajax({
                         type: "POST",
@@ -497,6 +598,7 @@
                         }
                     });
                 }
+
 
             })
         </script>

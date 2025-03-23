@@ -49,7 +49,7 @@ if(isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') {
         <span class="password_error text-red-500 text-sm  hidden "></span>
       </div>
 
-      <!-- Sign Up Button -->
+      <!-- Login Button -->
       <button
         name="postLogin"
         id="login_btn"
@@ -91,9 +91,7 @@ if(isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') {
 
       let email = $("#email").val();
       let password = $("#password").val();
-
       let errorCount = 0;
-
 
       if (email == "") {
         $(".email_error").text("email is required");
@@ -101,13 +99,13 @@ if(isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') {
         $("#email").addClass('border-red-500')
         errorCount++;
       }
+
       if (password == "") {
         $(".password_error").text("password is required");
         $(".password_error").removeClass("hidden");
         $("#password").addClass('border-red-500')
         errorCount++;
       }
-
 
       if (errorCount == 0) {
         let form = $("#loginForm");

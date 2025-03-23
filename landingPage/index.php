@@ -18,7 +18,7 @@ if (!isset($_SESSION['loginId']) || $_SESSION['loginId'] == '') {
 
 <body class="bg-gray-50 text-gray-800  ">
     <!-- main -->
-    <main class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white h-[100vh]">
+    <main class="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white h-[90vh]">
         <?php if (isset($_SESSION['loginId']) && $_SESSION['loginId'] != '') { ?>
 
             <div class="w-full flex justify-between gap-3 py-2 px-4">
@@ -58,11 +58,11 @@ if (!isset($_SESSION['loginId']) || $_SESSION['loginId'] == '') {
 
 
     <!-- Footer -->
-    <!-- <footer class="bg-gray-800 text-gray-400 py-6 h-[10vh]">
+    <footer class="bg-gray-800 text-gray-400 py-6 h-[10vh]">
         <div class="max-w-6xl mx-auto text-center">
             <p>&copy; 2025 Your Company Name. All rights reserved.</p>
         </div>
-    </footer> -->
+    </footer>
 </body>
 
 </html>
